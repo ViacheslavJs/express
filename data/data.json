@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Green World",
+    "price": 1200,
+    "text": " - Furniture description...",
+    "species": "Furniture 1",
+    "imagePath": "/images/fm-5.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Cosiness",
+    "price": 5300,
+    "text": " - Furniture description...",
+    "species": "Furniture 2",
+    "imagePath": "/images/fm-3.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Yellow",
+    "price": 200,
+    "text": " - Furniture description...",
+    "species": "Furniture 1",
+    "imagePath": "/images/fm-13.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Pink",
+    "price": null,
+    "text": " - Furniture description...",
+    "species": "Furniture 2",
+    "imagePath": "/images/fm-10.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Natural Wood",
+    "price": 400,
+    "text": " - Furniture description...",
+    "species": "Furniture 2",
+    "imagePath": "/images/fm-11.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Anywhere",
+    "price": 19056,
+    "text": " - efvgjihnuyhnec",
+    "species": "Furniture 6",
+    "imagePath": "/images/fm-2.jpg"
+  }
+]
