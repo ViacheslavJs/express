@@ -2,26 +2,26 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
   try {
-    const response = await fetch('/rest/players/data');
+    const response = await fetch('/api/rest/products/data');
     const data = await response.json();
     const tableBody = document.getElementById('table-body');
 
-    data.forEach((player, index) => {
+    data.forEach((product, index) => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${player.id}</td>
-        <td>${player.name}</td>
-        <td>${player.price}</td>
-        <td>${player.text}</td>
-        <td>${player.species}</td>
-        <td>${player.imagePath}</td>
+        <td>${product.id}</td>
+        <td>${product.name}</td>
+        <td>${product.price}</td>
+        <td>${product.text}</td>
+        <td>${product.alt}</td>
+        <td>${product.imagePath}</td>
         <td class="cell-delete">
           <button class="button-delete font-awesome-icon fas fa-trash-alt"></button>
         </td>
       `;
       tableBody.appendChild(row);
       // второй параметр в forEach - index - если нужен порядковый номер по массиву, тогда
-      // <td>${player.Id}</td> заменить на <td>${index + 1}</td>
+      // <td>${product.Id}</td> заменить на <td>${index + 1}</td>
     });
         
     const deleteButtons = document.querySelectorAll('.button-delete');
@@ -42,11 +42,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 // deleteRow
 async function deleteRow(button) {
   const row = button.parentElement.parentElement;
-  const playerName = row.querySelector('td:nth-child(2)').textContent; 
-  console.log(playerName);
+  const productName = row.querySelector('td:nth-child(2)').textContent; 
+  console.log(productName);
 
   try {
-    const response = await fetch(`/rest/players/${encodeURIComponent(playerName)}`, {
+    const response = await fetch(`/api/rest/products/${encodeURIComponent(productName)}`, {
       method: 'DELETE',
     });
 
@@ -54,11 +54,11 @@ async function deleteRow(button) {
       row.remove();
       location.reload();
     } else {
-      console.error('Failed to delete the player.');
+      console.error('Failed to delete the product.');
     }
         
   } catch (error) {
-    console.error('Error deleting player:', error);
+    console.error('Error deleting product:', error);
   }
       
 }
@@ -69,22 +69,22 @@ async function deleteRow(button) {
 document.getElementById('addPlayerForm').addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  const newPlayer = {
+  const newProduct = {
     id: parseInt(document.getElementById('id').value),
     name: document.getElementById('name').value,
     price: parseInt(document.getElementById('price').value),
     text: document.getElementById('text').value,
-    species: document.getElementById('species').value,
+    alt: document.getElementById('alt').value,
     imagePath: document.getElementById('imagePath').value,
   };
 
   try {
-    const response = await fetch('/rest/players', {
+    const response = await fetch('/api/rest/products', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(newPlayer),
+      body: JSON.stringify(newProduct),
     });
 
     if (response.status === 201) {
@@ -92,7 +92,7 @@ document.getElementById('addPlayerForm').addEventListener('submit', async (event
       location.reload();
       clearFormFields(); // Очистка полей формы
     } else {
-      console.error("Failed to add player.");
+      console.error("Failed to add product.");
     }
         
     // Очистка полей после добавления
@@ -101,12 +101,12 @@ document.getElementById('addPlayerForm').addEventListener('submit', async (event
       document.getElementById('name').value = '';
       document.getElementById('price').value = '';
       document.getElementById('text').value = '';
-      document.getElementById('species').value = '';
+      document.getElementById('alt').value = '';
       document.getElementById('imagePath').value = '';
     }
             
   } catch (error) {
-    console.error("Error adding player:", error);
+    console.error("Error adding product:", error);
   }
         
 });

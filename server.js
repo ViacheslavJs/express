@@ -235,7 +235,7 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.json()); // middleware для разбора JSON-запросов
 
 // TODO - GET
-app.get('/rest/players', async (req, res) => {
+app.get('/api/rest/products', async (req, res) => {
 
   try {
     const contents = await readFile(path.join(process.cwd(), 'views', 'admin.html'), 'utf8');
@@ -248,7 +248,7 @@ app.get('/rest/players', async (req, res) => {
 });
 
 // TODO - GET
-app.get('/rest/players/data', async (req, res) => {
+app.get('/api/rest/products/data', async (req, res) => {
 
   try {
     const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
@@ -261,26 +261,26 @@ app.get('/rest/players/data', async (req, res) => {
 });
 
 // TODO - DELETE
-app.delete('/rest/players/:playerName', async (req, res) => {
+app.delete('/api/rest/products/:productName', async (req, res) => {
 
   try {
-    const playerName = decodeURIComponent(req.params.playerName);
+    const productName = decodeURIComponent(req.params.productName);
     const dataPath = path.join(process.cwd(), 'data', 'data.json');
     const data = await readFile(dataPath, 'utf8');
     const jsonData = JSON.parse(data);
 
     // Находим индекс игрока по имени
-    const playerIndex = jsonData.findIndex((player) => player.name === playerName);
+    const productIndex = jsonData.findIndex((product) => product.name === productName);
 
-    if (playerIndex !== -1) {
+    if (productIndex !== -1) {
       // Удаляем игрока из массива данных
-      jsonData.splice(playerIndex, 1);
+      jsonData.splice(productIndex, 1);
 
       // Перезаписываем обновленные данные в файл
       await writeFile(dataPath, JSON.stringify(jsonData, null, 2), 'utf8');
       res.status(204).send();      
     } else {
-      res.status(404).json({ error: 'Player not found' });
+      res.status(404).json({ error: 'Product not found' });
     }
     
   } catch (error) {
@@ -290,22 +290,22 @@ app.delete('/rest/players/:playerName', async (req, res) => {
 });
 
 // TODO - POST
-app.post('/rest/players', async (req, res) => {
-  const newPlayer = req.body;
+app.post('/api/rest/products', async (req, res) => {
+  const newProduct = req.body;
   
   try {
     const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
     const jsonData = JSON.parse(data);
 
     // Добавляем нового игрока в массив данных
-    jsonData.push(newPlayer);
+    jsonData.push(newProduct);
 
     // Запись обновленных данных обратно в файл
     await writeFile(path.join(process.cwd(), 'data', 'data.json'), JSON.stringify(jsonData, null, 2), 'utf8');
 
-    res.status(201).json(newPlayer); // Успешное добавление
+    res.status(201).json(newProduct); // Успешное добавление
   } catch (err) {
-    res.status(500).json({ error: "Unable to add player" });
+    res.status(500).json({ error: "Unable to add product" });
   }
     
 });
