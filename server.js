@@ -168,6 +168,8 @@ app.listen(port, () => {
 import express from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import jwt from 'jsonwebtoken';
+import pg from 'pg';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -176,6 +178,246 @@ app.use(express.json());
 
 app.use(express.static('public')); // or
 //app.use(express.static(path.join(process.cwd(), 'public'))); // or
+
+//TODO////////////////// подключение к PostgreSQL: ////////////////
+/*
+const db = new pg.Client({
+  user: 'postgres',     // Имя пользователя "postgres"
+  password: 'postgres',  // Пароль пользователя "postgres"
+  database: 'online_store',
+});
+
+/*
+// syntax variant:
+db.connect((err, client) => {
+  if (err) throw err;
+  console.log('Connected to database', db.database); 
+});
+
+db.query('SELECT * FROM types', (err, result) => {
+  if(err) throw err;
+  console.log(result.rows); 
+  db.end(); 
+});
+//
+
+
+// syntax variant:
+db.connect((err) => {
+
+  if (err) {
+    throw err;
+  }
+  console.log('Connected to database', db.database);
+
+  // Пример выполнения SQL-запроса - types, brands, devices и т.д.  
+  db.query('SELECT * FROM types', (queryError, result) => {
+  
+    if (queryError) {
+      console.error('Error executing query:', queryError);
+    } else {
+      console.log('Query result:', result.rows);
+    }
+    db.end(); // Закрываем соединение с базой данных после выполнения запроса
+    
+  });
+  
+});
+*/
+
+/*
+// 1-й вариант:
+// асинхронная функция запроса к базе данных
+const queryDB = async (types) => {
+  try {
+    const client = new pg.Client({
+      user: 'postgres',
+      password: 'postgres',
+      database: 'online_store',
+    });
+
+    await client.connect(); // Устанавливаем соединение с базой данных
+
+    const result = await client.query(types); // Выполняем SQL-запрос
+
+    await client.end(); // Закрываем соединение
+    
+    console.log('Connected to database', client.database); 
+    console.log(result.rows); 
+    return result.rows; // Возвращаем результат запроса
+  } catch (error) {
+    throw error;
+  }
+};
+
+app.get('/api/types', async (req, res) => {
+  try {
+    const types = 'SELECT * FROM types'; // SQL-запрос к types, brands...
+    const table = await queryDB(types); // Вызываем асинхронную функцию
+
+    res.json(table);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при запросе к базе данных' });
+  }
+});
+//
+*/
+
+/*
+// 2-й вариант - рефакторинг:
+const { Pool } = pg;
+const databaseConfig = {
+  user: 'postgres',
+  password: 'postgres',
+  database: 'online_store',
+};
+
+const connectDB = () => {
+  // client - это объект, созданный библиотекой pg, 
+  // поэтому путь к свойству database будет таким - client.options.database
+  const client = new Pool(databaseConfig);
+  return client;
+};
+
+const executeQuery = async (client, query) => {
+  const result = await client.query(query);
+  return result.rows;
+};
+
+const closeDB = (client) => {
+  client.end();
+};
+
+const queryDB = async (types) => {
+  const client = connectDB();
+  try {
+    const result = await executeQuery(client, types);
+    //console.log('Connected to database', client.database); // неправильное извлечение свойства
+    
+    // обращение через объект client и св-во options:
+    console.log('Connected to database', client.options.database); // or
+    
+    //console.log('Connected to database', databaseConfig.database); // or - обращение напрямую к объекту
+    console.log(result); 
+    return result;
+  } finally {
+    closeDB(client);
+  }
+};
+
+app.get('/api/types', async (req, res) => {
+  try {
+    const typesQuery = 'SELECT * FROM types'; // SQL-запрос к types, brands...
+    const typesData = await queryDB(typesQuery); // Вызываем асинхронную функцию
+
+    res.json(typesData);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при запросе к базе данных' });
+  }
+});
+//
+*/
+
+// 3-й вариант - рефакторинг:
+const { Pool } = pg;
+
+const databaseConfig = {
+  user: 'postgres',
+  password: 'postgres',
+  //database: 'online_store',
+  //database: 'my_store',
+  database: 'my_store_test',
+};
+
+const pool = new Pool(databaseConfig);
+
+// Основная функция выполнения запросов к БД:
+const queryDB = async (query) => {
+  const client = await pool.connect();
+
+  try {
+    const result = await client.query(query);
+    console.log(result.rows); 
+    return result.rows;
+  } finally {
+    client.release();
+  }
+};
+
+
+// обработчик маршрута для получения таблицы:
+app.get('/api/furniture', async (req, res) => {
+  try {
+    const typesQuery = 'SELECT * FROM furniture';
+    const typesData = await queryDB(typesQuery);
+
+    res.json(typesData);
+  } catch (error) {
+    console.error('Ошибка при выполнении запроса к базе данных:', error);
+    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  }
+});
+//
+
+
+/*
+// обработчик маршрута для получения типов:
+app.get('/api/types', async (req, res) => {
+  try {
+    const typesQuery = 'SELECT * FROM types';
+    const typesData = await queryDB(typesQuery);
+
+    res.json(typesData);
+  } catch (error) {
+    console.error('Ошибка при выполнении запроса к базе данных:', error);
+    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  }
+});
+
+// обработчик маршрута для получения брендов:
+app.get('/api/brands', async (req, res) => {
+  try {
+    const brandsQuery = 'SELECT * FROM brands';
+    const brandsData = await queryDB(brandsQuery);
+
+    res.json(brandsData);
+  } catch (error) {
+    console.error('Ошибка при выполнении запроса к базе данных:', error);
+    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  }
+});
+//
+*/
+
+//////////////////////////////////// подключение к PostgreSQL
+
+
+/*
+//TODO - test authorization:
+app.get('/', async (req, res) => {
+  res.send('test');
+  console.log(req.body);
+});
+
+app.post('/auth/login', async (req, res) => {
+  console.log(req.body);
+  
+  const token = jwt.sign(
+    {
+      email: req.body.email,
+      fullName: 'Mike Johnson',
+    },
+    'secret123',
+  );
+  
+  res.json({
+    success: true,
+    token,
+  });
+  
+});
+//
+*/
 
 app.get('/api', async (req, res) => {
   try {

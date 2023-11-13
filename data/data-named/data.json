@@ -19,7 +19,7 @@
       "price": 1200,
       "text": " - Furniture description...",
       "species": "Furniture 1",
-      "imagePath": "/images/fm-5.jpg"
+      "imagePath": "/images/fm-5.webp"
     },
     {
       "id": 2,
@@ -27,7 +27,7 @@
       "price": 5300,
       "text": " - Furniture description...",
       "species": "Furniture 2",
-      "imagePath": "/images/fm-3.jpg"
+      "imagePath": "/images/fm-3.webp"
     },
     {
       "id": 3,
@@ -35,7 +35,7 @@
       "price": 200,
       "text": " - Furniture description...",
       "species": "Furniture 1",
-      "imagePath": "/images/fm-13.jpg"
+      "imagePath": "/images/fm-13.webp"
     },
     {
       "id": 4,
@@ -43,7 +43,7 @@
       "price": null,
       "text": " - Furniture description...",
       "species": "Furniture 2",
-      "imagePath": "/images/fm-10.jpg"
+      "imagePath": "/images/fm-10.webp"
     },
     {
       "id": 5,      
@@ -51,7 +51,7 @@
       "price": 400,
       "text": " - Furniture description...",
       "species": "Furniture 2",
-      "imagePath": "/images/fm-11.jpg"
+      "imagePath": "/images/fm-11.webp"
     }
   ]
 }
