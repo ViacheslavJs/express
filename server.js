@@ -167,6 +167,7 @@ app.listen(port, () => {
 // если data.json лежит в data
 import express from 'express';
 import { readFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import pg from 'pg';
@@ -174,12 +175,12 @@ import pg from 'pg';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(express.json());
+app.use(express.json()); // middleware для разбора JSON-запросов
 
 app.use(express.static('public')); // or
-//app.use(express.static(path.join(process.cwd(), 'public'))); // or
+app.use(express.static(path.join(process.cwd(), 'public'))); // or
 
-//TODO////////////////// подключение к PostgreSQL: ////////////////
+//TODO подключение к PostgreSQL > 
 /*
 const db = new pg.Client({
   user: 'postgres',     // Имя пользователя "postgres"
@@ -388,8 +389,7 @@ app.get('/api/brands', async (req, res) => {
 });
 //
 */
-
-//////////////////////////////////// подключение к PostgreSQL
+// < подключение к PostgreSQL TODO
 
 
 /*
@@ -418,23 +418,6 @@ app.post('/auth/login', async (req, res) => {
 });
 //
 */
-
-app.get('/api', async (req, res) => {
-  try {
-    const dataFolderPath = path.join(process.cwd(), 'data');
-    const filePath = path.join(dataFolderPath, 'data.json');
-    const data = await readFile(filePath, 'utf8');
-    const jsonData = JSON.parse(data);
-    res.json(jsonData);
-  } catch (error) {
-    res.status(500).json({ error: 'Сервер недоступен' });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`The server is running on port ${PORT}`);
-});
-//
 
 
 /*
@@ -470,11 +453,18 @@ app.listen(PORT, () => {
 //
 */
 
-//////////////////////////////////////////////////////////////////
-// TODO
-import { writeFile } from 'fs/promises';
-app.use(express.static(path.join(process.cwd(), 'public')));
-app.use(express.json()); // middleware для разбора JSON-запросов
+// TODO - GET
+app.get('/api', async (req, res) => {
+  try {
+    const dataFolderPath = path.join(process.cwd(), 'data');
+    const filePath = path.join(dataFolderPath, 'data.json');
+    const data = await readFile(filePath, 'utf8');
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (error) {
+    res.status(500).json({ error: 'Сервер недоступен' });
+  }
+});
 
 // TODO - GET
 app.get('/api/rest/products', async (req, res) => {
@@ -511,11 +501,11 @@ app.delete('/api/rest/products/:productName', async (req, res) => {
     const data = await readFile(dataPath, 'utf8');
     const jsonData = JSON.parse(data);
 
-    // Находим индекс игрока по имени
+    // Находим индекс товара по имени
     const productIndex = jsonData.findIndex((product) => product.name === productName);
 
     if (productIndex !== -1) {
-      // Удаляем игрока из массива данных
+      // Удаляем товар из массива данных
       jsonData.splice(productIndex, 1);
 
       // Перезаписываем обновленные данные в файл
@@ -539,7 +529,7 @@ app.post('/api/rest/products', async (req, res) => {
     const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
     const jsonData = JSON.parse(data);
 
-    // Добавляем нового игрока в массив данных
+    // Добавляем новый товар в массив данных
     jsonData.push(newProduct);
 
     // Запись обновленных данных обратно в файл
@@ -552,4 +542,9 @@ app.post('/api/rest/products', async (req, res) => {
     
 });
 
+//
+app.listen(PORT, () => {
+  console.log(`The server is running on port ${PORT} ` +
+      `mode on http://localhost:${PORT};` + '\npress Ctrl-C to terminate.');
+});
 
