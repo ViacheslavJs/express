@@ -326,8 +326,8 @@ const databaseConfig = {
   user: 'postgres',
   password: 'postgres',
   //database: 'online_store',
-  //database: 'my_store',
-  database: 'my_store_test',
+  database: 'my_store',
+  //database: 'my_store_test',
 };
 
 const pool = new Pool(databaseConfig);
