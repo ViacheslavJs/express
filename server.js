@@ -171,6 +171,9 @@ import { writeFile } from 'fs/promises';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import pg from 'pg';
+import dotenv from 'dotenv'; // Подключаем .env файл
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -321,13 +324,21 @@ app.get('/api/types', async (req, res) => {
 
 // 3-й вариант - рефакторинг:
 const { Pool } = pg;
-
+/*
 const databaseConfig = {
   user: 'postgres',
   password: 'postgres',
   //database: 'online_store',
-  database: 'my_store',
-  //database: 'my_store_test',
+  //database: 'my_store',
+  database: 'my_store_test',
+};
+*/
+const databaseConfig = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
 };
 
 const pool = new Pool(databaseConfig);
@@ -351,11 +362,15 @@ app.get('/api/furniture', async (req, res) => {
   try {
     const typesQuery = 'SELECT * FROM furniture';
     const typesData = await queryDB(typesQuery);
-
+    console.log('\x1b[1;44mDB: connected\x1b[0m', pool.options.database); // or если PostgreSQL запущен
+    //console.log('\x1b[1;44mDB: connected\x1b[0m', databaseConfig.database); // or если PostgreSQL запущен
     res.json(typesData);
-  } catch (error) {
+  } catch (error) { 
     console.error('Ошибка при выполнении запроса к базе данных:', error);
     res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    console.log('\x1b[1;43;97mDB: disconnected\x1b[0m'); // если PostgreSQL остановлен
+    //console.log('\x1b[1;43;5;97mDB: disconnected\x1b[0m'); // если PostgreSQL остановлен
+    //console.log('\x1b[1;5;89;97mDB: disconnected\x1b[0m'); // если PostgreSQL остановлен
   }
 });
 //
@@ -453,7 +468,9 @@ app.listen(PORT, () => {
 //
 */
 
-// TODO - GET
+
+// маршрут для TestData, TestServer:
+// TODO - or
 app.get('/api', async (req, res) => {
   try {
     const dataFolderPath = path.join(process.cwd(), 'data');
@@ -465,9 +482,56 @@ app.get('/api', async (req, res) => {
     res.status(500).json({ error: 'Сервер недоступен' });
   }
 });
+/*
+// маршрут для TestData, TestServer:
+// TODO - or
+app.get('/api', async (req, res) => {
+
+  try {
+    const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (err) {
+    res.status(500).json({ error: 'Unable to fetch data' });
+  }
+  
+});
+//
+*/
+
+
+// для Fullstack:
+// TODO - GET -or
+app.get('/api/products', async (req, res) => {
+  try {
+    const dataFolderPath = path.join(process.cwd(), 'data');
+    const filePath = path.join(dataFolderPath, 'data.json');
+    const data = await readFile(filePath, 'utf8');
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (error) {
+    res.status(500).json({ error: 'Сервер недоступен' });
+  }
+});
+
+/*
+// TODO - GET -or
+app.get('/api/products', async (req, res) => {
+
+  try {
+    const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (err) {
+    res.status(500).json({ error: 'Unable to fetch data' });
+  }
+  
+});
+//
+*/
 
 // TODO - GET
-app.get('/api/rest/products', async (req, res) => {
+app.get('/api/admin', async (req, res) => {
 
   try {
     const contents = await readFile(path.join(process.cwd(), 'views', 'admin.html'), 'utf8');
@@ -479,21 +543,8 @@ app.get('/api/rest/products', async (req, res) => {
   
 });
 
-// TODO - GET
-app.get('/api/rest/products/data', async (req, res) => {
-
-  try {
-    const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
-    const jsonData = JSON.parse(data);
-    res.json(jsonData);
-  } catch (err) {
-    res.status(500).json({ error: 'Unable to fetch data' });
-  }
-  
-});
-
 // TODO - DELETE
-app.delete('/api/rest/products/:productName', async (req, res) => {
+app.delete('/api/products/:productName', async (req, res) => {
 
   try {
     const productName = decodeURIComponent(req.params.productName);
@@ -502,11 +553,13 @@ app.delete('/api/rest/products/:productName', async (req, res) => {
     const jsonData = JSON.parse(data);
 
     // Находим индекс товара по имени
-    const productIndex = jsonData.findIndex((product) => product.name === productName);
+    // для неименованного массива в json - убрать furnitures
+    const productIndex = jsonData.furnitures.findIndex((product) => product.name === productName);
 
     if (productIndex !== -1) {
       // Удаляем товар из массива данных
-      jsonData.splice(productIndex, 1);
+      // для неименованного массива в json - убрать furnitures
+      jsonData.furnitures.splice(productIndex, 1);
 
       // Перезаписываем обновленные данные в файл
       await writeFile(dataPath, JSON.stringify(jsonData, null, 2), 'utf8');
@@ -522,7 +575,7 @@ app.delete('/api/rest/products/:productName', async (req, res) => {
 });
 
 // TODO - POST
-app.post('/api/rest/products', async (req, res) => {
+app.post('/api/products', async (req, res) => {
   const newProduct = req.body;
   
   try {
@@ -530,7 +583,8 @@ app.post('/api/rest/products', async (req, res) => {
     const jsonData = JSON.parse(data);
 
     // Добавляем новый товар в массив данных
-    jsonData.push(newProduct);
+    // для неименованного массива в json - убрать furnitures
+    jsonData.furnitures.push(newProduct);
 
     // Запись обновленных данных обратно в файл
     await writeFile(path.join(process.cwd(), 'data', 'data.json'), JSON.stringify(jsonData, null, 2), 'utf8');
@@ -541,6 +595,30 @@ app.post('/api/rest/products', async (req, res) => {
   }
     
 });
+// 
+
+// TODO - POST
+// 'changeCurrency'
+app.post('/api/currency', async (req, res) => {
+  const { str: newCrncValue } = req.body; // Извлечение нового значения валюты
+
+  try {
+    const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
+    const jsonData = JSON.parse(data);
+
+    // Обновление значения валюты
+    jsonData.crnc[0].str = newCrncValue;
+
+    // Запись обновленных данных обратно в файл
+    await writeFile(path.join(process.cwd(), 'data', 'data.json'), JSON.stringify(jsonData, null, 2), 'utf8');
+
+    res.status(201).json({ str: newCrncValue }); // Успешное обновление
+  } catch (err) {
+    res.status(500).json({ error: "Невозможно обновить валюту" });
+  }
+});
+//
+// Fullstack
 
 //
 app.listen(PORT, () => {

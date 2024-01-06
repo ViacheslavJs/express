@@ -2,16 +2,41 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
   try {
-    const response = await fetch('/api/rest/products/data');
+    const response = await fetch('/api/products');
     const data = await response.json();
     const tableBody = document.getElementById('table-body');
+    const curBody = document.getElementById('cur-body');
+    
+    /* 
+    const v = {
+      vv: document.getElementById('banned').value,
+    };
+    //o.innerHTML = `<div>${v.vv}</div>`;
+    */
+    const string = data.crnc[0].str;  
+    console.log(string);
+    
+    const o = document.createElement('div');    
+    o.innerHTML = `<div>Currency: ${string}</div>`;
+    
+    //data.forEach((product, index) => { // для неименованного массива в json
+    data.furnitures.forEach((product, index) => {
 
-    data.forEach((product, index) => {
+      //
+      const currency = string;
+      //const currency = v.vv;
+      const formatPrice = new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency,
+        currencyDisplay: 'narrowSymbol',
+      }).format(product.price);
+      //    
+
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${product.id}</td>
         <td>${product.name}</td>
-        <td>${product.price}</td>
+        <td>${formatPrice}</td>
         <td>${product.text}</td>
         <td>${product.alt}</td>
         <td>${product.imagePath}</td>
@@ -20,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </td>
       `;
       tableBody.appendChild(row);
+      curBody.appendChild(o);
       // второй параметр в forEach - index - если нужен порядковый номер по массиву, тогда
       // <td>${product.Id}</td> заменить на <td>${index + 1}</td>
     });
@@ -46,7 +72,7 @@ async function deleteRow(button) {
   console.log(productName);
 
   try {
-    const response = await fetch(`/api/rest/products/${encodeURIComponent(productName)}`, {
+    const response = await fetch(`/api/products/${encodeURIComponent(productName)}`, {
       method: 'DELETE',
     });
 
@@ -79,7 +105,7 @@ document.getElementById('addPlayerForm').addEventListener('submit', async (event
   };
 
   try {
-    const response = await fetch('/api/rest/products', {
+    const response = await fetch('/api/products', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -111,4 +137,34 @@ document.getElementById('addPlayerForm').addEventListener('submit', async (event
         
 });
 // 'addPlayerForm'
+
+// 'changeCurrency'
+document.getElementById('changeCurrency').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const newCrncValue = document.getElementById('banned').value;
+
+  try {
+    const response = await fetch('/api/currency', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ str: newCrncValue }),
+    });
+
+    if (response.status === 201) {
+      // Успешное добавление, перезагрузить страницу или обновить данные
+      location.reload();
+      //clearFormFields(); // Очистка полей формы
+    } else {
+      console.error("Failed to add product.");
+    }
+            
+  } catch (error) {
+    console.error("Error adding product:", error);
+  }
+        
+});
+// 'changeCurrency'
         
