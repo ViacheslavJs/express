@@ -72,23 +72,18 @@
     {
       "id": 8,
       "name": "Ваша пещера",
-      "price": "75000",
+      "price": "10000",
       "text": "Your cave",
       "alt": "Furniture 8",
       "imagePath": "/images/fm-35.webp"
-    },
-    {
-      "id": 9,
-      "name": "hnytn",
-      "price": null,
-      "text": "",
-      "alt": "",
-      "imagePath": "/images/fm-56.webp"
     }
   ],
   "crnc": [
     {
       "str": "USD"
+    },
+    {
+      "rate": 40
     }
   ]
 }

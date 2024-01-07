@@ -600,7 +600,7 @@ app.post('/api/products', async (req, res) => {
 // TODO - POST
 // 'changeCurrency'
 app.post('/api/currency', async (req, res) => {
-  const { str: newCrncValue } = req.body; // Извлечение нового значения валюты
+  const { str: newCrncValue, rate: newRate } = req.body; // Извлечение нового значения валюты
 
   try {
     const data = await readFile(path.join(process.cwd(), 'data', 'data.json'), 'utf8');
@@ -608,11 +608,12 @@ app.post('/api/currency', async (req, res) => {
 
     // Обновление значения валюты
     jsonData.crnc[0].str = newCrncValue;
+    jsonData.crnc[1].rate = parseFloat(newRate); 
 
     // Запись обновленных данных обратно в файл
     await writeFile(path.join(process.cwd(), 'data', 'data.json'), JSON.stringify(jsonData, null, 2), 'utf8');
 
-    res.status(201).json({ str: newCrncValue }); // Успешное обновление
+    res.status(201).json({ str: newCrncValue, rate: newRate }); // Успешное обновление
   } catch (err) {
     res.status(500).json({ error: "Невозможно обновить валюту" });
   }

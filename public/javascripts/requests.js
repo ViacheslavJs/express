@@ -14,10 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     //o.innerHTML = `<div>${v.vv}</div>`;
     */
     const string = data.crnc[0].str;  
+    const num = data.crnc[1].rate;  
     console.log(string);
     
     const o = document.createElement('div');    
-    o.innerHTML = `<div>Currency: ${string}</div>`;
+    o.innerHTML = `<div class="currency"><span>Currency: ${string}</span> &#124; <span>Rate: ${num}</span></div>`;
     
     //data.forEach((product, index) => { // для неименованного массива в json
     data.furnitures.forEach((product, index) => {
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         style: 'currency',
         currency,
         currencyDisplay: 'narrowSymbol',
-      }).format(product.price);
+      }).format(product.price / num);
       //    
 
       const row = document.createElement('tr');
@@ -143,6 +144,7 @@ document.getElementById('changeCurrency').addEventListener('submit', async (even
   event.preventDefault();
 
   const newCrncValue = document.getElementById('banned').value;
+  const newRate = document.getElementById('rate').value;
 
   try {
     const response = await fetch('/api/currency', {
@@ -150,7 +152,7 @@ document.getElementById('changeCurrency').addEventListener('submit', async (even
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ str: newCrncValue }),
+      body: JSON.stringify({ str: newCrncValue, rate: newRate }),
     });
 
     if (response.status === 201) {
