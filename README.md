@@ -4,6 +4,16 @@
 
 Server for the [https://github.com/ViacheslavJs/modals-react](https://github.com/ViacheslavJs/modals-react) project
 
+Functionality of the admin panel and interaction with the client side:
+ - Adding/removing a product (name, price, description, photo)
+ - Currency change
+
+Next task:
+ - `TODO` - add editing for each user;
+ - `TODO` - add data entry validation
+ - `TODO` - confirmation when deleting a user
+ - `TODO` - implement authorization
+
 Work on the project continues.
 
 ## Beginning of work: 
@@ -30,15 +40,6 @@ Launch to test the admin panel
  
 The admin panel is available at [http://localhost:3001/api/admin](http://localhost:3001/api/admin)
 
-Functionality of the admin panel and interaction with the client side:
- - Adding/removing a product (name, price, description, photo)
- - Currency change
-
-Next task:
- - `TODO` - add editing for each user;
- - `TODO` - add data entry validation
- - `TODO` - confirmation when deleting a user
- - `TODO` - implement authorization
  
 ### Deployment
  [is being developed]
