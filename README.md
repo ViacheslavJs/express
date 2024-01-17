@@ -34,7 +34,7 @@ Running in development mode:
 
   ~/express$ `npm run dev`
 
-Launch to test the admin panel
+Launch to test the admin panel:
 
  ~/express$ `npm start`
  
